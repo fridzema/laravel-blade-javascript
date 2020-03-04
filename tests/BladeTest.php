@@ -81,6 +81,28 @@ class BladeTest extends TestCase
     }
 
     /** @test */
+    public function it_can_render_a_string_with_line_breaks()
+    {
+        $parameter = ['string' => "This is\r\n a test"];
+
+        $this->assertEquals(
+            '<script>window[\'js\'] = window[\'js\'] || {};window[\'js\'][\'string\'] = \'This is\\r\\n a test\';</script>',
+            $this->renderView('variable', compact('parameter'))
+        );
+    }
+
+    /** @test */
+    public function it_can_render_a_numeric_string_as_a_string()
+    {
+        $parameter = ['socialSecurity' => '123456789'];
+
+        $this->assertEquals(
+            '<script>window[\'js\'] = window[\'js\'] || {};window[\'js\'][\'socialSecurity\'] = \'123456789\';</script>',
+            $this->renderView('variable', compact('parameter'))
+        );
+    }
+
+    /** @test */
     public function it_can_render_arrayable_objects()
     {
         $parameter = new class implements Arrayable {
@@ -163,5 +185,16 @@ class BladeTest extends TestCase
         $this->expectException(ErrorException::class);
 
         $this->renderView('variable', ['parameter' => $resource]);
+    }
+
+    /** @test */
+    public function it_can_render_a_customized_view()
+    {
+        $this->app['view']->replaceNamespace('bladeJavaScript', [__DIR__.'/resources/views/override']);
+
+        $this->assertEquals(
+            '<script type="application/javascript">window[\'js\'] = window[\'js\'] || {};window[\'js\'][\'key\'] = \'value\';</script>',
+            $this->renderView('keyValue')
+        );
     }
 }
